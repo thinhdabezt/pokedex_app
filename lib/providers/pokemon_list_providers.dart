@@ -6,11 +6,15 @@ class PokemonListProviders extends ChangeNotifier {
   final PokeApiService api;
 
   List<PokemonListItem> mons = [];
+  List<PokemonListItem> filteredMons = [];
 
   bool isLoading = false;
   bool hasNext = true;
   int offset = 0;
   final int limit = 20;
+
+  String seacrhQuery = "";
+  String? selectedType;
 
   PokemonListProviders(this.api);
 

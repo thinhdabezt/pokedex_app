@@ -38,7 +38,9 @@ class HomeScreen extends StatelessWidget {
                 final p = provider.mons[index];
                 return PokemonCard(pokemon: p);
               } else {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(color: Colors.red),
+                );
               }
             },
           ),
