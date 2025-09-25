@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex_app/models/pokemon_detail.dart';
 import '../models/pokemon_list_item.dart';
@@ -11,23 +10,29 @@ class PokeApiService {
 
   PokeApiService({http.Client? client}) : client = client ?? http.Client();
 
-  Future<List<PokemonListItem>> fetchPokemonList({
-    int limit = 20,
-    int offset = 0,
-  }) async {
-    final uri = Uri.parse('$_base/pokemon?limit=$limit&offset=$offset');
+  Future<List<PokemonListItem>> fetchPokemonList(
+      {int limit = 1500, int offset = 0}) async {
+    final url = Uri.parse('$_base/pokemon?limit=$limit&offset=$offset');
+    final response = await http.get(url);
 
-    final resp = await client.get(uri);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final results = data['results'] as List;
 
-    if (resp.statusCode != 200) {
-      throw Exception("Failed to load Pokémon list :(");
+      return results.map((item) {
+        final id = _extractIdFromUrl(item['url']);
+        return PokemonListItem(
+          name: item['name'],
+          url: item['url'],
+          imageUrl:
+              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png',
+          id: id,
+          types: [],
+        );
+      }).toList();
+    } else {
+      throw Exception('Failed to load Pokémon');
     }
-
-    final map = jsonDecode(resp.body) as Map<String, dynamic>;
-
-    final results = map['results'] as List<dynamic>;
-
-    return results.map((e) => PokemonListItem.fromJson(e)).toList();
   }
 
   Future<PokemonDetail> fetchPokemonDetail(int id) async {
@@ -36,9 +41,51 @@ class PokeApiService {
 
     if (resp.statusCode != 200) {
       throw Exception('Failed to load Pokémon detail');
-    } 
+    }
 
     final map = jsonDecode(resp.body) as Map<String, dynamic>;
     return PokemonDetail.fromJson(map);
+  }
+
+  Future<List<PokemonListItem>> fetchPokemonByType(String type) async {
+    final url = Uri.parse('$_base/type/$type');
+    final resp = await http.get(url);
+
+    if(resp.statusCode == 200){
+      final data = jsonDecode(resp.body);
+      final results = data['pokemon'] as List;  
+      return results.map((item){
+        final poke = item['pokemon'];
+        final id = _extractIdFromUrl(poke['url']);
+        return PokemonListItem(
+          name: poke['name'],
+          url: poke['url'],
+          imageUrl:
+              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png',
+          id: id,
+          types: [type],
+        );
+      }).toList();
+    } else {
+      throw Exception('Failed to load Pokémon by type :(');
+    }
+  }
+
+  Future<List<String>> fetchTypes() async {
+    final url = Uri.parse('$_base/type');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final results = data['results'] as List;
+      return results.map<String>((item) => item['name'] as String).toList();
+    } else {
+      throw Exception('Failed to load types');
+    }
+  }
+
+  int _extractIdFromUrl(String url) {
+    final parts = url.split('/');
+    return int.parse(parts[parts.length - 2]);
   }
 }
