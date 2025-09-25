@@ -5,72 +5,62 @@ import '../models/pokemon_list_item.dart';
 class PokemonListProviders extends ChangeNotifier {
   final PokeApiService api;
 
-  List<PokemonListItem> pokemons = [];
-  List<PokemonListItem> filteredMons = []; // danh sách sau khi search/filter
+  List<PokemonListItem> allPokemons = [];
+  List<PokemonListItem> displayPokemons = []; 
+  List<String> types = []; 
 
   bool isLoading = false;
-  bool hasNext = true;
-  int offset = 0;
-  final int limit = 1500;
-
   String searchQuery = "";
   String? selectedType;
 
   PokemonListProviders(this.api);
 
-  Future<void> fetchNext() async {
-    if (isLoading || !hasNext) return;
-
+  Future<void> initialize() async {
     isLoading = true;
     notifyListeners();
 
     try {
-      final list = await api.fetchPokemonList(limit: limit, offset: offset);
+      allPokemons = await api.fetchAllPokemonList();
+      types = await api.fetchTypes();
 
-      pokemons.addAll(list);
-      offset += limit;
-
-      if (list.length < limit) hasNext = false;
-
-      // Mỗi khi load thêm → cập nhật filter
-      applyFilters();
+      displayPokemons = allPokemons.take(50).toList();
     } catch (e) {
-      debugPrint('Error: $e');
+      debugPrint('Error init: $e');
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> refresh() async {
-    pokemons.clear();
-    filteredMons.clear();
-    offset = 0;
-    hasNext = true;
-    await fetchNext();
-  }
-
-  // Set query tìm kiếm
   void setSearchQuery(String query) {
     searchQuery = query.toLowerCase();
-    applyFilters();
+    _applyFilters();
   }
 
-  // Set bộ lọc theo type
-  void setTypeFilter(String? type) {
+  Future<void> setTypeFilter(String? type) async {
     selectedType = type;
-    applyFilters();
+
+    if (type == null) {
+      _applyFilters();
+    } else {
+      isLoading = true;
+      notifyListeners();
+      try {
+        final list = await api.fetchPokemonByType(type);
+        displayPokemons = list;
+      } catch (e) {
+        debugPrint('Error filter type: $e');
+      } finally {
+        isLoading = false;
+        notifyListeners();
+      }
+    }
   }
 
-  // Áp dụng tìm kiếm + lọc
-  void applyFilters() {
-    filteredMons = pokemons.where((p) {
-      final matchSearch =
-          searchQuery.isEmpty || p.name.toLowerCase().contains(searchQuery);
-      final matchType = selectedType == null || p.types.contains(selectedType);
-      return matchSearch && matchType;
+  void _applyFilters() {
+    displayPokemons = allPokemons.where((p) {
+      return p.name.toLowerCase().contains(searchQuery);
     }).toList();
-
     notifyListeners();
   }
 }

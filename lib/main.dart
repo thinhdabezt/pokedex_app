@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => PokemonListProviders(PokeApiService())..fetchNext(),
+          create: (_) => PokemonListProviders(PokeApiService())..initialize(),
         ),
       ],
       child: MaterialApp(
