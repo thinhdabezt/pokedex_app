@@ -11,6 +11,7 @@ void main() async {
 
   await Hive.initFlutter();
   await Hive.openBox<int>('favorites');
+  await Hive.openBox<Map>('pokemon_details'); 
 
   runApp(const MyApp());
 }

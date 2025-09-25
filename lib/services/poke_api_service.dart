@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex_app/models/pokemon_detail.dart';
 import '../models/pokemon_list_item.dart';
@@ -60,6 +61,13 @@ class PokeApiService {
   }
 
   Future<PokemonDetail> fetchPokemonDetail(int id) async {
+    final box = Hive.box<Map>('pokemon_details');
+
+    if(box.containsKey(id)){
+      final cached = Map<String, dynamic>.from(box.get(id)!);
+      return PokemonDetail.fromJson(cached);
+    }
+
     final uri = Uri.parse('$_base/pokemon/$id');
     final resp = await client.get(uri);
 
@@ -68,6 +76,9 @@ class PokeApiService {
     }
 
     final map = jsonDecode(resp.body) as Map<String, dynamic>;
+
+    await box.put(id, map);
+
     return PokemonDetail.fromJson(map);
   }
 
