@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pokedex_app/models/pokemon_list_item.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:pokedex_app/screens/pokemon_detail_screen.dart';
+import 'package:provider/provider.dart';
+import '../models/pokemon_list_item.dart';
+import '../screens/pokemon_detail_screen.dart';
+import '../providers/favorites_provider.dart';
 
 class PokemonCard extends StatelessWidget {
   final PokemonListItem pokemon;
@@ -10,6 +12,9 @@ class PokemonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favProvider = Provider.of<FavoritesProvider>(context);
+    final isFav = favProvider.isFavorite(pokemon.id);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -42,7 +47,16 @@ class PokemonCard extends StatelessWidget {
               pokemon.name[0].toUpperCase() + pokemon.name.substring(1),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            // const SizedBox(height: 8),
+            IconButton(
+              onPressed: () {
+                favProvider.toggleFavorite(pokemon.id);
+              },
+              icon: Icon(
+                isFav ? Icons.favorite : Icons.favorite_border,
+                color: isFav ? Colors.red : Colors.grey,
+              ),
+            ),
           ],
         ),
       ),

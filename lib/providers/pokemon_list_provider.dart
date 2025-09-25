@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/poke_api_service.dart';
 import '../models/pokemon_list_item.dart';
 
-class PokemonListProviders extends ChangeNotifier {
+class PokemonListProvider extends ChangeNotifier {
   final PokeApiService api;
 
   List<PokemonListItem> allPokemons = [];
@@ -13,7 +13,7 @@ class PokemonListProviders extends ChangeNotifier {
   String searchQuery = "";
   String? selectedType;
 
-  PokemonListProviders(this.api);
+  PokemonListProvider(this.api);
 
   Future<void> initialize() async {
     isLoading = true;
