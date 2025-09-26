@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:pokedex_app/models/evolution_chain.dart';
 import 'package:pokedex_app/models/pokemon_detail.dart';
 import '../models/pokemon_list_item.dart';
 
@@ -17,7 +18,7 @@ class PokeApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final results = data['results'] as List;
+      final results = (data['results'] ?? []) as List;
 
       return results.map((item) {
         final id = _extractIdFromUrl(item['url']);
@@ -42,7 +43,7 @@ class PokeApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final results = data['results'] as List;
+      final results = (data['results'] ?? []) as List;
 
       return results.map((item) {
         final id = _extractIdFromUrl(item['url']);
@@ -113,11 +114,32 @@ class PokeApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final results = data['results'] as List;
+      final results = (data['results'] ?? []) as List;
       return results.map<String>((item) => item['name'] as String).toList();
     } else {
       throw Exception('Failed to load types');
     }
+  }
+
+  Future<EvolutionChain> fetchEvolutionChain(int id) async {
+    final speciesUrl = Uri.parse('$_base/pokemon-species/$id');
+    final speciesResp = await http.get(speciesUrl);
+
+    if(speciesResp.statusCode != 200){
+      throw Exception("Failed to fetch species :(");
+    }
+
+    final speciesData = jsonDecode(speciesResp.body);
+    final evolUrl = speciesData['evolution_chain']['url'];
+
+    final evolResp = await http.get(Uri.parse(evolUrl));
+
+    if(evolResp.statusCode != 200) {
+      throw Exception("Failed to fetch evolution chain :(");
+    }
+
+    final evolData = jsonDecode(evolResp.body);
+    return EvolutionChain.fromJson(evolData);
   }
 
   int _extractIdFromUrl(String url) {

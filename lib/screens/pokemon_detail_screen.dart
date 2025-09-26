@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_app/models/evolution_chain.dart';
 import '../services/poke_api_service.dart';
 import '../models/pokemon_detail.dart';
 import '../models/pokemon_list_item.dart';
@@ -16,6 +17,7 @@ class PokemonDetailScreen extends StatefulWidget {
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   final api = PokeApiService();
   PokemonDetail? detail;
+  EvolutionChain? evolution;
   bool isLoading = true;
 
   @override
@@ -27,8 +29,11 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   Future<void> _loadDetail() async {
     try {
       final d = await api.fetchPokemonDetail(widget.pokemon.id);
+      final evol = await api.fetchEvolutionChain(widget.pokemon.id);
+
       setState(() {
         detail = d;
+        evolution = evol;
         isLoading = false;
       });
     } catch (e) {
@@ -167,6 +172,65 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                           )
                           .toList(),
                     ),
+                    if (evolution != null) ...[
+                      const SizedBox(height: 24),
+                      const Text(
+                        "Evolution Chain",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: evolution!.stages.map((stage) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder: (_, __, ___) =>
+                                      PokemonDetailScreen(
+                                        pokemon: PokemonListItem(
+                                          id: stage.id,
+                                          name: stage.name,
+                                          url: '',
+                                          imageUrl: stage.imageUrl,
+                                          types: [],
+                                        ),
+                                      ),
+                                  transitionsBuilder: (_, anim, __, child) {
+                                    return ScaleTransition(
+                                      scale: CurvedAnimation(
+                                        parent: anim,
+                                        curve: Curves.easeInOut,
+                                      ),
+                                      child: FadeTransition(
+                                        opacity: anim,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Hero(
+                                  tag: 'pokemon-${stage.id}',
+                                  child: Image.network(
+                                    stage.imageUrl,
+                                    height: 80,
+                                  ),
+                                ),
+                                Text(stage.name.toUpperCase()),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   ],
                 ),
               ),
