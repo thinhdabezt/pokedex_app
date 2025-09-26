@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/pokemon_list_provider.dart';
@@ -17,14 +18,14 @@ class FavoritesScreen extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Your Favorite Mons")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).translate("favorites-title"))),
       body: favPokemons.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Each pokémon is someone's favorite , so don't hesitate to add them",
+                    AppLocalizations.of(context).translate("favorites-empty"),
                   ),
                   Icon(Icons.favorite_sharp, color: Colors.red),
                 ],
