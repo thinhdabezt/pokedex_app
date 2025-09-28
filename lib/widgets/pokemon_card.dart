@@ -34,12 +34,12 @@ class PokemonCard extends StatelessWidget {
               tag: 'pokemon-${pokemon.id}',
               child: CachedNetworkImage(
                 imageUrl: pokemon.imageUrl,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(color: Colors.red),
+                placeholder: (context, url) => const SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
-                fit: BoxFit.contain,
-                height: 100,
               ),
             ),
             const SizedBox(height: 8),

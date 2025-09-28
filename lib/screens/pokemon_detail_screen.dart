@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pokedex_app/l10n/app_localizations.dart';
 import 'package:pokedex_app/models/evolution_chain.dart';
@@ -25,6 +26,12 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   void initState() {
     super.initState();
     _loadDetail();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(NetworkImage(widget.pokemon.imageUrl), context);
   }
 
   Future<void> _loadDetail() async {
@@ -87,7 +94,15 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 ),
                 background: Hero(
                   tag: 'pokemon-${widget.pokemon.id}',
-                  child: Image.network(detail!.imageUrl, fit: BoxFit.contain),
+                  child: CachedNetworkImage(
+                    imageUrl: detail!.imageUrl,
+                    placeholder: (context, url) => const SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  ),
                 ),
               ),
             ),

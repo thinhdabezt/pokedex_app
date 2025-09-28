@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex_app/providers/pokemon_list_provider.dart';
 import 'package:pokedex_app/screens/favorites_screen.dart';
+import 'package:pokedex_app/widgets/shimmer.dart';
 import 'package:provider/provider.dart';
 import '../widgets/pokemon_card.dart';
 import '../l10n/app_localizations.dart';
@@ -20,7 +21,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final controller = ScrollController();
   int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
       () =>
           Provider.of<PokemonListProvider>(context, listen: false).initialize(),
     );
+
+    final provider = Provider.of<PokemonListProvider>(context, listen: false);
+    provider.loadMore();
+
+    controller.addListener(() {
+      if (controller.position.pixels >=
+          controller.position.maxScrollExtent - 200) {
+        provider.loadMore();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,20 +89,25 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 8),
 
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: provider.displayPokemons.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 3 / 4,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemBuilder: (context, index) {
-                final p = provider.displayPokemons[index];
-                return PokemonCard(pokemon: p);
-              },
-            ),
+            child: provider.isLoading && provider.pokemons.isEmpty
+                ? ListView.builder(
+                    itemCount: 10,
+                    itemBuilder: (_, __) => buildShimmerItem(),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: provider.displayPokemons.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 3 / 4,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemBuilder: (context, index) {
+                      final p = provider.displayPokemons[index];
+                      return PokemonCard(pokemon: p);
+                    },
+                  ),
           ),
         ],
       ),
