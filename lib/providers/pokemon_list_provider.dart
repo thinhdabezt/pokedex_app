@@ -27,7 +27,7 @@ class PokemonListProvider extends ChangeNotifier {
       allPokemons = await api.fetchAllPokemonList();
       types = await api.fetchTypes();
 
-      displayPokemons = allPokemons.take(50).toList();
+      displayPokemons = List.from(allPokemons);
     } catch (e) {
       debugPrint('Error init: $e');
     } finally {

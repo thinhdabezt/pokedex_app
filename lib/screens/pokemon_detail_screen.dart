@@ -9,8 +9,9 @@ import '../utils/type_colors.dart';
 
 class PokemonDetailScreen extends StatefulWidget {
   final PokemonListItem pokemon;
+  final String? heroTag;
 
-  const PokemonDetailScreen({super.key, required this.pokemon});
+  const PokemonDetailScreen({super.key, required this.pokemon, this.heroTag});
 
   @override
   State<PokemonDetailScreen> createState() => _PokemonDetailScreenState();
@@ -93,7 +94,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   ),
                 ),
                 background: Hero(
-                  tag: 'pokemon-${widget.pokemon.id}',
+                  tag: widget.heroTag ?? 'pokemon-${widget.pokemon.id}',
                   child: CachedNetworkImage(
                     imageUrl: detail!.imageUrl,
                     placeholder: (context, url) => const SizedBox(

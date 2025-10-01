@@ -7,14 +7,7 @@ import '../widgets/pokemon_card.dart';
 import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
-  final VoidCallback onToggleTheme;
-  final void Function(Locale) onChangeLanguage;
-
-  const HomeScreen({
-    super.key,
-    required this.onToggleTheme,
-    required this.onChangeLanguage,
-  });
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -60,8 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                // hintText: const Text('Search Pokémon');
-                hintText: AppLocalizations.of(context).translate("search"),
+                hintText: 'Search Pokémon',
+                // hintText: AppLocalizations.of(context).translate("search"),
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.search),
               ),
@@ -117,35 +110,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pokedex'),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: const Icon(Icons.brightness_6),
-          ),
-          PopupMenuButton<Locale>(
-            onSelected: widget.onChangeLanguage,
-            itemBuilder: (_) => [
-              const PopupMenuItem(value: Locale('en'), child: Text("English")),
-              const PopupMenuItem(
-                value: Locale('vi'),
-                child: Text("Tiếng Việt"),
-              ),
-            ],
-          ),
-        ],
       ),
       body: screen[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Pokedex"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: AppLocalizations.of(context).translate("favorites"),
-          ),
-        ],
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: _selectedIndex,
+      //   onTap: (i) => setState(() => _selectedIndex = i),
+      //   items: [
+      //     BottomNavigationBarItem(icon: Icon(Icons.list), label: "Pokedex"),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.favorite),
+      //       label: AppLocalizations.of(context).translate("favorites"),
+      //     ),
+      //   ],
+      // ),
     );
   }
 }

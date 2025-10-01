@@ -2,7 +2,11 @@ import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:pokedex_app/models/evolution_chain.dart';
+import 'package:pokedex_app/models/game.dart';
+import 'package:pokedex_app/models/item.dart';
+import 'package:pokedex_app/models/move.dart';
 import 'package:pokedex_app/models/pokemon_detail.dart';
+import 'package:pokedex_app/models/pokemon_entry.dart';
 import '../models/pokemon_list_item.dart';
 
 class PokeApiService {
@@ -36,8 +40,10 @@ class PokeApiService {
     }
   }
 
-  Future<List<PokemonListItem>> fetchPokemonList(
-      {int limit = 1500, int offset = 0}) async {
+  Future<List<PokemonListItem>> fetchPokemonList({
+    int limit = 1500,
+    int offset = 0,
+  }) async {
     final url = Uri.parse('$_base/pokemon?limit=$limit&offset=$offset');
     final response = await http.get(url);
 
@@ -64,7 +70,7 @@ class PokeApiService {
   Future<PokemonDetail> fetchPokemonDetail(int id) async {
     final box = Hive.box<Map>('pokemon_details');
 
-    if(box.containsKey(id)){
+    if (box.containsKey(id)) {
       final cached = Map<String, dynamic>.from(box.get(id)!);
       return PokemonDetail.fromJson(cached);
     }
@@ -125,7 +131,7 @@ class PokeApiService {
     final speciesUrl = Uri.parse('$_base/pokemon-species/$id');
     final speciesResp = await http.get(speciesUrl);
 
-    if(speciesResp.statusCode != 200){
+    if (speciesResp.statusCode != 200) {
       throw Exception("Failed to fetch species :(");
     }
 
@@ -134,12 +140,113 @@ class PokeApiService {
 
     final evolResp = await http.get(Uri.parse(evolUrl));
 
-    if(evolResp.statusCode != 200) {
+    if (evolResp.statusCode != 200) {
       throw Exception("Failed to fetch evolution chain :(");
     }
 
     final evolData = jsonDecode(evolResp.body);
     return EvolutionChain.fromJson(evolData);
+  }
+
+  Future<List<Map<String, String>>> fetchMoveList({
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    final url = Uri.parse('$_base/move?offset=$offset&limit=$limit');
+    final resp = await http.get(url);
+    if (resp.statusCode != 200) throw Exception("Failed to fetch moves");
+    final data = jsonDecode(resp.body);
+    final results = (data['results'] as List)
+        .map((e) => {"name": e["name"].toString(), "url": e["url"].toString()})
+        .toList();
+    return results;
+  }
+
+  Future<Move> fetchMoveDetail(String name) async {
+    final url = Uri.parse('$_base/move/$name');
+    final resp = await http.get(url);
+    if (resp.statusCode != 200) throw Exception("Failed to fetch move detail");
+    final data = jsonDecode(resp.body);
+    return Move.fromJson(data);
+  }
+
+  Future<List<Map<String, String>>> fetchItemList({
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    final url = Uri.parse('$_base/item?offset=$offset&limit=$limit');
+    final resp = await http.get(url);
+    if (resp.statusCode != 200) throw Exception("Failed to fetch items");
+    final data = jsonDecode(resp.body);
+    final results = (data['results'] as List)
+        .map((e) => {"name": e["name"].toString(), "url": e["url"].toString()})
+        .toList();
+    return results;
+  }
+
+  Future<Item> fetchItemDetail(String name) async {
+    final url = Uri.parse('$_base/item/$name');
+    final resp = await http.get(url);
+    if (resp.statusCode != 200) throw Exception("Failed to fetch item detail");
+    final data = jsonDecode(resp.body);
+    return Item.fromJson(data);
+  }
+
+  Future<List<Map<String, String>>> fetchGameList({
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    final url = Uri.parse('$_base/version?offset=$offset&limit=$limit');
+    final resp = await http.get(url);
+    if (resp.statusCode != 200) throw Exception("Failed to fetch games");
+    final data = jsonDecode(resp.body);
+    final results = (data['results'] as List)
+        .map((e) => {"name": e["name"].toString(), "url": e["url"].toString()})
+        .toList();
+    return results;
+  }
+
+  Future<Game> fetchGameDetail(String name) async {
+    // Step 1: get version info
+    final versionUrl = Uri.parse('$_base/version/$name');
+    final versionResp = await http.get(versionUrl);
+    if (versionResp.statusCode != 200)
+      throw Exception("Failed to fetch version");
+    final versionData = jsonDecode(versionResp.body);
+
+    // Step 2: get version-group info
+    final groupUrl = versionData["version_group"]["url"];
+    final groupResp = await http.get(Uri.parse(groupUrl));
+    if (groupResp.statusCode != 200)
+      throw Exception("Failed to fetch version group");
+    final groupData = jsonDecode(groupResp.body);
+
+    return Game.fromJson(versionData, groupData);
+  }
+
+  Future<List<PokemonEntry>> fetchPokemonInGame(String versionName) async {
+    // B1: get version -> version_group
+    final versionUrl = Uri.parse('$_base/version/$versionName');
+    final versionResp = await http.get(versionUrl);
+    if (versionResp.statusCode != 200) throw Exception("Failed to fetch version");
+    final versionData = jsonDecode(versionResp.body);
+    final groupUrl = versionData["version_group"]["url"];
+
+    // B2: get version-group -> pokedexes
+    final groupResp = await http.get(Uri.parse(groupUrl));
+    if (groupResp.statusCode != 200) throw Exception("Failed to fetch version group");
+    final groupData = jsonDecode(groupResp.body);
+    final pokedexes = groupData["pokedexes"] as List;
+    if (pokedexes.isEmpty) return [];
+
+    // B3: get first pokedex -> entries
+    final pokedexUrl = pokedexes[0]["url"];
+    final pokedexResp = await http.get(Uri.parse(pokedexUrl));
+    if (pokedexResp.statusCode != 200) throw Exception("Failed to fetch pokedex");
+    final pokedexData = jsonDecode(pokedexResp.body);
+
+    final entries = pokedexData["pokemon_entries"] as List;
+    return entries.map((e) => PokemonEntry.fromJson(e)).toList();
   }
 
   int _extractIdFromUrl(String url) {
