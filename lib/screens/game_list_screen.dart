@@ -16,15 +16,26 @@ class _GameListScreenState extends State<GameListScreen> {
   @override
   void initState() {
     super.initState();
-    final provider = Provider.of<GameListProvider>(context, listen: false);
-    provider.loadMore();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<GameListProvider>(context, listen: false);
+      provider.loadMore();
 
-    controller.addListener(() {
-      if (controller.position.pixels >=
-          controller.position.maxScrollExtent - 200) {
-        provider.loadMore();
-      }
+      controller.addListener(() {
+        if (controller.position.pixels >=
+            controller.position.maxScrollExtent - 200) {
+          provider.loadMore();
+        }
+      });
     });
+    // final provider = Provider.of<GameListProvider>(context, listen: false);
+    // provider.loadMore();
+
+    // controller.addListener(() {
+    //   if (controller.position.pixels >=
+    //       controller.position.maxScrollExtent - 200) {
+    //     provider.loadMore();
+    //   }
+    // });
   }
 
   @override
@@ -55,7 +66,8 @@ class _GameListScreenState extends State<GameListScreen> {
               Expanded(
                 child: ListView.builder(
                   controller: controller,
-                  itemCount: provider.displayGames.length + (provider.hasMore ? 1 : 0),
+                  itemCount:
+                      provider.displayGames.length + (provider.hasMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == provider.displayGames.length) {
                       return const Center(child: CircularProgressIndicator());

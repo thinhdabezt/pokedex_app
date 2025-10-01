@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:pokedex_app/l10n/app_localizations.dart';
 import 'package:pokedex_app/models/evolution_chain.dart';
 import '../services/poke_api_service.dart';
 import '../models/pokemon_detail.dart';
@@ -132,7 +131,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      AppLocalizations.of(context).translate("stats"),
+                      "Stats",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -168,7 +167,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      AppLocalizations.of(context).translate("abilities"),
+                      "Abilities",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -192,7 +191,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     if (evolution != null) ...[
                       const SizedBox(height: 24),
                       Text(
-                        AppLocalizations.of(context).translate("evolution"),
+                        "Evolution",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

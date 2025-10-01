@@ -13,6 +13,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // Use set() for boolean properties in Kotlin DSL
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -41,4 +43,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // ...existing code...
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    // ...existing code...
 }

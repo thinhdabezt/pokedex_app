@@ -16,15 +16,26 @@ class _MoveListScreenState extends State<MoveListScreen> {
   @override
   void initState() {
     super.initState();
-    final provider = Provider.of<MoveListProvider>(context, listen: false);
-    provider.loadMore();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<MoveListProvider>(context, listen: false);
+      provider.loadMore();
 
-    controller.addListener(() {
-      if (controller.position.pixels >=
-          controller.position.maxScrollExtent - 200) {
-        provider.loadMore();
-      }
+      controller.addListener(() {
+        if (controller.position.pixels >=
+            controller.position.maxScrollExtent - 200) {
+          provider.loadMore();
+        }
+      });
     });
+    // final provider = Provider.of<MoveListProvider>(context, listen: false);
+    // provider.loadMore();
+
+    // controller.addListener(() {
+    //   if (controller.position.pixels >=
+    //       controller.position.maxScrollExtent - 200) {
+    //     provider.loadMore();
+    //   }
+    // });
   }
 
   @override

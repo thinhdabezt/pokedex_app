@@ -52,7 +52,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Image.network(item!.imageUrl, height: 100),
+            Image.network(item!.imageUrl, height: 100, width: 100,  fit: BoxFit.contain),
             const SizedBox(height: 16),
             Text("Category: ${item!.category}", style: const TextStyle(fontSize: 16)),
             Text("Cost: ${item!.cost}", style: const TextStyle(fontSize: 16)),

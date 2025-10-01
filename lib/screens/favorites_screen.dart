@@ -18,14 +18,14 @@ class FavoritesScreen extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).translate("favorites-title"))),
+      appBar: AppBar(title: Text("Each pokémon is someone's favorite , so don't hesitate to add them!")),
       body: favPokemons.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    AppLocalizations.of(context).translate("favorites-empty"),
+                    "Favorites Empty",
                   ),
                   Icon(Icons.favorite_sharp, color: Colors.red),
                 ],
